@@ -1,0 +1,39 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:security="http://www.springframework.org/schema/security"
+	xmlns:oauth="http://www.springframework.org/schema/security/oauth2"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+						http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security.xsd
+						http://www.springframework.org/schema/security/oauth2 http://www.springframework.org/schema/security/spring-security-oauth2-1.0.xsd">
+
+	<security:global-method-security pre-post-annotations="enabled" secured-annotations="enabled" />
+
+	<security:http>
+		<security:intercept-url pattern="/userHome" access="IS_AUTHENTICATED_FULLY" />
+		<security:intercept-url pattern="/**" access="IS_AUTHENTICATED_ANONYMOUSLY" />
+		<security:logout />
+	</security:http>
+
+	<bean id="ajaxAwareLoginUrlAuthenticationEntryPoint" class="com.fcs.chest.magic.security.AjaxAwareLoginUrlAuthenticationEntryPoint">
+		<constructor-arg value="/login" />
+	</bean>
+	
+	<!--apply the oauth client context-->
+<oauth:client   id="oauth2ClientFilter" />
+
+<oauth:resource id="google" 
+    type="authorization_code" 
+    client-id="660714249132.apps.googleusercontent.com" 
+    client-secret="4HdAX-G-88BThPr5R1kfOKFH"
+    access-token-uri="https://accounts.google.com/o/oauth2/token" 
+    user-authorization-uri="https://accounts.google.com/o/oauth2/auth"
+    scope="https://www.googleapis.com/auth/userinfo.profile;https://www.googleapis.com/auth/userinfo.email;https://www.googleapis.com/auth/drive"
+    client-authentication-scheme="form"
+    pre-established-redirect-uri="https://ohad.sealdoc.com/oauth2-client/hello" />
+
+<bean id="googleClientService" class="com...GoogleClientServiceImpl">
+    <property name="butkeDemoRestTemplate">
+        <oauth:rest-template resource="google" />
+    </property>
+</bean>
+</beans>

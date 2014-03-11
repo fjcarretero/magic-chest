@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:util="http://www.springframework.org/schema/util"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd">
+
+	<bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver" />
+	
+	<bean id="encryptorHelper" class="com.fcs.chest.magic.cipher.EncryptorHelper">
+		<property name="encryptor" ref="encryptor"/>
+	</bean>
+
+	<bean id="decryptorHelper" class="com.fcs.chest.magic.cipher.DecryptorHelper">
+		<property name="decryptor" ref="decryptor"/>
+	</bean>
+	
+	<bean id="encryptor" class="com.fcs.chest.magic.cipher.CipherFactoryBean">
+	    <property name="initializationVector" value="8888888888888888"/>
+	    <property name="algorithm" value="AES/CBC/PKCS5Padding"/>
+	    <property name="key" ref="secretKey"/>
+	    <property name="operationMode">
+	    	<util:constant static-field="javax.crypto.Cipher.ENCRYPT_MODE"/>
+	    </property>
+	</bean>
+	
+	<bean id="decryptor" class="com.fcs.chest.magic.cipher.CipherFactoryBean">
+	    <property name="initializationVector" value="8888888888888888"/>
+	    <property name="algorithm" value="AES/CBC/PKCS5Padding"/>
+	    <property name="key" ref="secretKey"/>
+	    <property name="operationMode">
+	    	<util:constant static-field="javax.crypto.Cipher.DECRYPT_MODE"/>
+	    </property>
+	</bean>
+	
+	<bean id="secretKey" class="com.fcs.chest.magic.cipher.SecretKeyFactoryBean">
+	    <property name="keyStore" ref="keyStore"/>
+	    <property name="privateKeyAlias" value="mykey"/>
+	    <property name="privateKeyPassword" value="foobar"/>
+	</bean>
+	<!-- 
+	<bean id="encryptor" class="com.fcs.chest.magic.cipher.CipherFactoryBean">
+	    <property name="algorithm" value="RSA"/>
+	    <property name="key" ref="publicKey"/>
+	    <property name="operationMode">
+	    	<util:constant static-field="javax.crypto.Cipher.ENCRYPT_MODE"/>
+	    </property>
+	</bean>
+	
+	<bean id="decryptor" class="com.fcs.chest.magic.cipher.CipherFactoryBean">
+	    <property name="algorithm" value="RSA"/>
+	    <property name="key" ref="privateKey"/>
+	    <property name="operationMode">
+	    	<util:constant static-field="javax.crypto.Cipher.DECRYPT_MODE"/>
+	    </property>
+	</bean>
+	
+	<bean id="privateKey" class="com.fcs.chest.magic.cipher.PrivateKeyFactoryBean">
+	    <property name="keyStore" ref="keyStore"/>
+	    <property name="privateKeyAlias" value="pubcert"/>
+	    <property name="privateKeyPassword" value="foobar"/>
+	</bean>
+	<bean id="publicKey" class="com.fcs.chest.magic.cipher.PublicKeyFactoryBean">
+	    <property name="keyStore" ref="keyStore"/>
+	    <property name="certificateAlias" value="pubcert"/>
+	</bean>
+	
+	<bean id="keyStore" class="com.fcs.chest.magic.cipher.KeyStoreFactoryBean">
+	    <property name="type" value="jks"/>
+	    <property name="location" value="classpath:pubcertkeystore"/>
+	    <property name="password" value="foobar"/>
+	</bean>
+		 -->		
+	<bean id="keyStore" class="com.fcs.chest.magic.cipher.KeyStoreFactoryBean">
+	    <property name="type" value="jceks"/>
+	    <property name="location" value="classpath:mykeystore"/>
+	    <property name="password" value="foobar"/>
+	</bean>
+
+</beans>
