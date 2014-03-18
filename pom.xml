@@ -1,11 +1,11 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>magicchest</groupId>
-	<artifactId>magicchest</artifactId>
+	<groupId>com.fjcs</groupId>
+	<artifactId>magic-chest</artifactId>
 	<packaging>war</packaging>
 	<version>1.0</version>
-	<name>magicchest</name>
+	<name>magic-chest</name>
 	<repositories>
 		<repository>
 			<id>eap</id>
@@ -181,4 +181,7 @@
 			</build>
 		</profile>
 	</profiles>
+	<build>
+        	<finalName>magic-chest</finalName>
+        </build>
 </project>
