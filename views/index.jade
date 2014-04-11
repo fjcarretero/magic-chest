@@ -55,7 +55,7 @@ block body
 						h4.modal-title Email	
 					.modal-body
 						input.form-control(name="email", type="email", ng-model='email', required)
-							span.has-error(ng-show="myForm.email.$error.email") Not valid email!
+						span.has-error(ng-show="myForm.email.$error.email") Not valid email!
 					.modal-footer
 						a.btn(href="#", data-dismiss='modal') Cancel
 						a.btn.btn-primary(class="{{ hasErrors() }}", data-dismiss='modal', ng-click='shareFile()') Share

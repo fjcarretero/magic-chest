@@ -58,7 +58,7 @@ exports.getKeys = function (req, res, next) {
 
 exports.generateKey = function (req, res, next) {
 
-    crypto2.randomBytes(128), function(ex, buf) {
+    crypto2.randomBytes(128, function(ex, buf) {
         if(ex){
             return next(ex);
         } else {

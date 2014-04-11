@@ -1,4 +1,4 @@
-!!!
+doctype
 - var env = process.env['NODE_ENV']
 html(ng-app="magic-chest")
 	head
@@ -11,15 +11,15 @@ html(ng-app="magic-chest")
 		link(rel='stylesheet', href='/css/typeahead.js-bootstrap.css')
 		<!--[if lte IE 8]>
 		script
-			document.createElement('ng-include');
-			document.createElement('ng-pluralize');
-			document.createElement('ng-view');
-			document.createElement('textile');
+			document.createElement('ng-include')
+			document.createElement('ng-pluralize')
+			document.createElement('ng-view')
+			document.createElement('textile')
  
 			// Optionally these for CSS
-			document.createElement('ng:include');
-			document.createElement('ng:pluralize');
-			document.createElement('ng:view');
+			document.createElement('ng:include')
+			document.createElement('ng:pluralize')
+			document.createElement('ng:view')
 		<![endif]-->
 		script(src='http://code.jquery.com/jquery-1.9.1.min.js')
 		script(src='js/lib/moment/moment.min.js')

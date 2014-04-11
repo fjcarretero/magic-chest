@@ -34,7 +34,7 @@ function errorHandler(err, req, res, next) {
   res.render('error', { error: err });
 }
 
-app.configure(function(){
+app.configure( function() {
   app.set('views', __dirname + '/views');
   app.set('view engine', 'jade');
   app.use(express.cookieParser());
