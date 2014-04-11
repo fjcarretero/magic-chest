@@ -164,16 +164,6 @@ global.key = new Buffer(hexKey, 'hex');
 //});
 //
 //var usrs = [
-//	{
-//		email: 'fjcarretero@gmail.com',
-//		familyId: 'carretero',
-//		role: 'admin'
-//	},
-//	{
-//		email: 'cmmarroyo@gmail.com',
-//		familyId: 'carretero',
-//		role: 'user'
-//	}
 //];
 //var user = null;
 //usrs.forEach(function (usr){
