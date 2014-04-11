@@ -10,11 +10,13 @@ var express = require('express'),
   models = require('./models'),
   passport = require('passport'),
   fs = require('fs'),
+  nconf = require('nconf'),
   GoogleStrategy = require('passport-google-oauth').OAuth2Strategy,
   logger = require('./winston');
 
 var app = module.exports = express();
 
+nconf.file({ file: 'google-settings.json' });
 
 // Configuration
 
@@ -61,12 +63,7 @@ app.configure('development', function(){
 		"name":"",
 		"db":"db3"
 	};
-	googleConfig = {
-		clientID: '660714249132.apps.googleusercontent.com',
-		clientSecret: '4HdAX-G-88BThPr5R1kfOKFH',
-		callbackURL: 'http://localhost:3000/auth/google/callback',
-        passReqToCallback: true
-	};
+	googleConfig = nconf.get("settings");
 });
 
 app.configure('production', function(){
@@ -84,11 +81,7 @@ app.configure('production', function(){
 	};
 	//logger.info(mongo1);
 	//mongo = env['mongodb-1.8'][0];
-	googleConfig = {
-		clientID: '835707212206-v5d8aetgc5totep5dlb2mv9nbp32pn2k.apps.googleusercontent.com',
-		clientSecret: 'vGt-LFj8SaVosN8eJQyQutEI',
-		callbackURL: 'http://magicchest-fjcs.rhcloud.com/auth/google/callback'
-	};
+	googleConfig = nconf.get("settings");
 });
 
 // Passport

@@ -3,3 +3,4 @@
 /*.log
 /.openshift/
 /node_modules/
+/google-settings.json
