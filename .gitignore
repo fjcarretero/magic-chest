@@ -1,3 +1,18 @@
+<<<<<<< HEAD
 /key
 /test*
 /*.log
+=======
+*.class
+
+# Package Files #
+*.jar
+*.war
+*.ear
+/.project
+/.classpath
+/.settings
+/target
+>>>>>>> db1ca45de037fed2960f7cc451e5b219ff0ffe86
+/.openshift/
+/node_modules/
