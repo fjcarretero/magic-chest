@@ -1,30 +1,5 @@
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
 /key
 /test*
 /*.log
-=======
-=======
->>>>>>> db1ca45de037fed2960f7cc451e5b219ff0ffe86
-=======
->>>>>>> db1ca45de037fed2960f7cc451e5b219ff0ffe86
-*.class
-
-# Package Files #
-*.jar
-*.war
-*.ear
-/.project
-/.classpath
-/.settings
-/target
-<<<<<<< HEAD
-<<<<<<< HEAD
->>>>>>> db1ca45de037fed2960f7cc451e5b219ff0ffe86
 /.openshift/
 /node_modules/
-=======
->>>>>>> db1ca45de037fed2960f7cc451e5b219ff0ffe86
-=======
->>>>>>> db1ca45de037fed2960f7cc451e5b219ff0ffe86
