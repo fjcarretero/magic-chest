@@ -273,6 +273,6 @@ app.get('*', routes.login);
 
 // Start server
 
-app.listen(process.env.VCAP_APP_PORT || 3000, function(){
+app.listen(process.env.OPENSHIFT_NODEJS_PORT || 3000, function(){
   logger.info("Express server listening on port %d in %s mode", this.address().port, app.settings.env);
 });
