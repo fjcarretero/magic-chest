@@ -1,0 +1,9 @@
+{
+	"jshint": {
+    	"options": {
+        	"browser": true,
+        	"globalstrict": true
+        },
+        "global": [ "angular", "jQuery", "Downloadify", "_", "jsPDF", "require", "exports", "moment" ]
+    }
+}
