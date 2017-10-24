@@ -1,0 +1,9 @@
+.modal-header
+	button.close(type='button', aria-hidden='true') &times;
+	h4.modal-title Date taken	
+.modal-body
+	input.form-control(name="dateTaken", type="date", ng-model='dateTaken', required)
+	span.has-error(ng-show="myForm.dateTaken.$error.dateTaken") Not valid date!
+.modal-footer
+	a.btn(ng-click='cancel()') Cancel
+	a.btn.btn-primary(class="{{ hasErrors() }}", ng-click='modifyDate()') Modify

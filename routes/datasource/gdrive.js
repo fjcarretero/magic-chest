@@ -1,9 +1,9 @@
 var _ = require('underscore'),
-	logger = require('../winston'),
+	logger = require('../../winston'),
     q = require('q'),
     formidable = require('formidable'),
     request = require('superagent'),
-    crypto = require('./utilsCrypto'),
+    crypto = require('../utilsCrypto'),
     crypto2 = require('crypto');
 
 function GDrive(){
@@ -27,6 +27,7 @@ function GDrive(){
 //                    console.log(resp.body);
                     var tt = crypto.decrypt(resp.body, global.key.toString('binary'));
                     session.keys[item.owners[0].permissionId] = tt;
+//                    console.log(session.keys);
                     callback();
                 }
             });
@@ -58,12 +59,17 @@ function GDrive(){
     };
 
     function mapFile(item, tKey, callback){
+        logger.info('title', item.title);
         var tt = crypto.decrypt(new Buffer(item.title, 'hex'), tKey).split('|');
+
+        //logger.info('item=', item);
 
         var ret = _mapFile(item);
 
         ret.name = tt[0];
         ret.documentType = tt[1];
+
+        logger.info(ret.name);
 
         callback(null, ret);
     };
@@ -134,7 +140,8 @@ function GDrive(){
     //                        req.session.keyFileId = item.id;
                             ret.permissionId = item.owners[0].permissionId;
                             ret.keyFileId = item.id;
-														ret.folderId = item.parents[0];
+														ret.folderId = item.parents[0].id;
+														console.log(ret);
                         }
                         queue.push(q.nfcall(retrieveStoreKeys, accessToken, ret, item));
                     });
@@ -157,8 +164,12 @@ function GDrive(){
     };
 
     this.storeKey = function(accessToken, buf, callback, callbackError){
-        var ret = {};
-				// Create folder
+        var cipher = crypto2.createCipheriv('aes-128-cbc', global.key.toString('binary'), '8888888888888888');
+
+        var ret = {
+            keys: {}
+        };
+
 				request
 					.post('https://www.googleapis.com/upload/drive/v2/files')
 					.type('application/vnd.google-apps.folder')
@@ -167,17 +178,22 @@ function GDrive(){
 						if(e){
 							callbackError(e);
 						} else {
-							ret.folderId = r.body.id
-							request
+							ret.folderId = r.body.id;
+							console.log(r.body);
+
+        			var r = request
             		.post('https://www.googleapis.com/upload/drive/v2/files')
             		.type('application/vnd.rig.cryptonote')
             		.query({uploadType: "media"})
-            		.set('Authorization', 'Bearer ' +accessToken)
-            		.write(crypto.encrypt(buf, global.key.toString('binary')).toString('hex'))
-            		.end(function(err, res){
-                	if(err){
+            		.set('Authorization', 'Bearer ' +accessToken);
+//        r.write(crypto.encrypt(buf, global.key.toString('binary')), 'binary');
+
+        			r.write(cipher.update(buf, 'binary', 'binary'), 'binary');
+        			r.write(cipher.final('binary'), 'binary');
+        			r.end(function(err, res){
+                if(err){
                     callbackError(err);
-                	} else {
+                } else {
                     request
                         .put('https://www.googleapis.com/drive/v2/files/' + res.body.id)
                         .type('application/json')
@@ -189,18 +205,18 @@ function GDrive(){
                             } else {
                                 ret.permissionId = res.body.owners[0].permissionId;
                                 ret.keyFileId = res.body.id;
-                                ret.keys[req.session.permissionId] = buf;
-
+                                ret.keys[ret.permissionId] = buf.toString('binary');
+//                                console.log(ret);
                                 callback(ret);
                             }
                         });
-                	}
-            		});
+                }
+            	});
 						}
 					});
     };
 
-    this.getFiles = function(accessToken, keys, callback, callbackError){
+    this.getFiles = function(accessToken, keys, query, callback, callbackError){
         var r = [],
             queue = [];
 
@@ -211,25 +227,31 @@ function GDrive(){
             .set('Authorization', 'Bearer ' + accessToken)
             .end(function(err, resp){
                 if (err){
+                    logger.error('google get file error', err);
                     callbackError(err);
                 } else {
+                     logger.info('google get file success');
                     var response = resp.body;
+                    //logger.info(response.items);
                     _.each(response.items, function(item){
+                        //logger.info(item);
                         queue.push(q.nfcall(mapFile, item, keys[item.owners[0].permissionId]));
                     });
                     q.all(queue)
                         .then(function(ful) {
-                           callback(ful);
+                            logger.info('google get file success 2');
+                            callback(ful);
                         }, function(rej) {
                             // SEND AND ERRO
-                            logger.error(rej);
+                            logger.error('Reject error: ', rej);
                         })
                         .fail(function(err) {
-                            //
+                            logger.error('Fail error: ', err);
                             callbackError(err);
                         })
-                        .fin(function() {
-                            //
+                        .fin(function(ful) {
+                            logger.info('Fin=', ful);
+//                            callback(ful);
                         });
                 }
             });
@@ -250,12 +272,16 @@ function GDrive(){
             .set('Authorization', 'Bearer ' + accessToken);
     };
 
-    this.endUploadFile = function(accessToken, resp, encName, callback, callbackError){
-        request
+    this.setProperties = function(stream, encname, filesize){
+    };
+
+    this.endUploadFile = function(accessToken, resp, encName, folderId, callback, callbackError){
+
+				request
             .put('https://www.googleapis.com/drive/v2/files/' + resp.body.id)
             .type('application/json')
             .set('Authorization', 'Bearer ' + accessToken)
-            .send({title: encName}, parents: [{id: folderId}])
+            .send({title: encName, parents: [{id: folderId}]})
             .end(function(er, re){
                 if(er){
                     callbackError(er);
@@ -306,6 +332,9 @@ function GDrive(){
                 callback();
             });
         });
+    };
+
+    this.setDateTaken = function(accessToken, dateTaken, id, callback, callbackError){
     };
 }
 

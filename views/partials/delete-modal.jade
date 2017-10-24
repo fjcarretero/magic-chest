@@ -1,0 +1,8 @@
+.modal-header
+	button.close(type='button', aria-hidden='true') &times;
+	h4.modal-title Delete Photo?
+.modal-body
+	p Do you want to delete {{ imagesName }}?
+.modal-footer
+	a.btn(ng-click='cancel()') No
+	a.btn.btn-primary(ng-click='deletePhoto()') Yes

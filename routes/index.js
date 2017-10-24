@@ -4,7 +4,7 @@
  */
 
 exports.index = function(req, res){
-  res.render('index', { email:req.user.email });
+  res.render('index', { email:req.user.email, provider:req.session.provider });
 };
 
 exports.baseAdmin = function(req, res){
@@ -26,7 +26,7 @@ exports.admin = function(req, res){
 exports.partials = function (req, res) {
   var name = req.params.name;
   console.log(name);
-  res.render('partials/' + name);
+  res.render('partials/' + name, { email:req.user.email, provider:req.session.provider });
 };
 
 exports.adminPages = function (req, res) {

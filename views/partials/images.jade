@@ -1,0 +1,50 @@
+.container
+	.container.navbar.navbar-default
+		.row-fluid
+			.col-xs-4.text-center
+				a.navbar-brand(href="#") Magic-Chest
+			.col-xs-4.text-center
+				.btn-group
+					button.btn.btn-default.navbar-btn.dropdown-toggle(data-toggle='dropdown')
+						span.glyphicon.glyphicon-user
+					ul.dropdown-menu(role="menu")
+						li
+							a.text-left(href="https://www.google.com/accounts/Logout") Logout (#{email})
+			.col-xs-4.text-right
+				a.btn.btn-default.navbar-btn.glyphicon.glyphicon-list(type="button", href="/list")
+		.row
+			.messagesList(app-messages)
+		.row.show-grid
+			nav#menu
+				#box(ng-class="isMenuOpen()")
+					ul
+						li
+							a(ng-click='menuOpen=false;openEdit("lg")')
+								i.glyphicon.glyphicon-edit
+								span Edit
+						li
+							a(ng-click='menuOpen=false;openDelete("lg")')
+								i.glyphicon.glyphicon-remove
+								span Delete
+						li
+							a(ng-click='menuOpen=false')
+								i.glyphicon.glyphicon-off
+								span Cancel
+			.col-xs-12
+				form.form-horizontal(name='form', role='form', novalidate)
+					.form-group
+						.col-xs-4
+							a.btn.btn-default.navbar-btn.glyphicon.glyphicon-cog(ng-click="openMenu()")
+						label.col-xs-4.control-label(for='month') Mes
+						.col-xs-4
+							select.form-control(ng-model='filterDate', ng-options='c.text for c in dateList track by c.text', name='month', required)
+			.col-xs-12(ng-if="files.length > 0")
+				img.hidden(ng-src="{{getPreviousImageSrc();}}")
+				img.img-responsive.center-block.loading(ng-show="loadingImg")
+				img.img-responsive.center-block(ng-show="!loadingImg", sb-load="onlola()", ng-src="{{getCurrentImageSrc();}}", ng-swipe-left="nextSlide()", ng-swipe-right="prevSlide()", on-long-press="openMenu()", prevent-click="true", style="-webkit-user-select: none;-webkit-touch-callout: none;")
+				a.count {{ counter }}
+				a.arrow.prev(ng-click='prevSlide()')
+				a.arrow.next(ng-click='nextSlide()')
+				img.hidden(ng-src="{{getNextImageSrc();}}")
+			.col-xs-12(ng-if="files.length === 0")
+				p no images found

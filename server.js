@@ -3,20 +3,22 @@
  * Module dependencies.
  */
 
-var express = require('express'),
+var _ =  require('underscore'),
+  express = require('express'),
   routes = require('./routes'),
-  gdrive = require('./routes/gdrive'),
+  services = require('./routes/services'),
+  upload = require('./routes/uploader/upload-formidable'),
   mongoose = require('mongoose'),
   models = require('./models'),
   passport = require('passport'),
   fs = require('fs'),
-  nconf = require('nconf'),
   GoogleStrategy = require('passport-google-oauth').OAuth2Strategy,
+  FlickrStrategy = require('passport-flickr').Strategy,
   logger = require('./winston');
 
 var app = module.exports = express();
 
-nconf.file({ file: 'google-settings.json' });
+//nconf.file({ file: 'settings.json' });
 
 // Configuration
 
@@ -30,9 +32,17 @@ function clientErrorHandler(err, req, res, next) {
 
 function errorHandler(err, req, res, next) {
   res.status(500);
-  logger.error(err);
+  logger.error('Error: ', err);
   res.render('error', { error: err });
 }
+
+//function redirectSec(req, res, next) {
+//    if (req.headers['x-forwarded-proto'] == 'http' && ) {
+//        res.redirect('https://' + req.headers.host + req.path);
+//    } else {
+//        return next();
+//    }
+//}
 
 app.configure( function() {
   app.set('views', __dirname + '/views');
@@ -47,13 +57,45 @@ app.configure( function() {
   app.use(passport.session());
   app.use(clientErrorHandler);
   app.use(errorHandler);
+  app.configure('production', function(){
+    app.use(function (req, res, next) {
+      var schema = (req.headers['x-forwarded-proto'] || '').toLowerCase();
+//      console.log(schema)
+      if (schema === 'https') {
+        next();
+      } else {
+        res.redirect('https://' + req.headers.host + req.url);
+      }
+    });
+  });
   app.use(app.router);
 });
 
 var mongo,
-	googleConfig;
+	  googleConfig,
+    flickrConfig;
+
+googleConfig = {
+  clientID: process.env.GOOGLE_CLIENT_ID,
+  clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+  callbackURL: process.env.GOOGLE_CALLBACK_URL,
+  passReqToCallback: true
+};
+flickrConfig = {
+  consumerKey: process.env.FLICKR_CONSUMER_KEY,
+  consumerSecret: process.env.FLICKR_CONSUMER_SECRET,
+  callbackURL: process.env.FLICKR_CALLBACK_URL,
+  userAuthorizationURL: process.env.FLICKR_USER_AUTHORIZATION_URL,
+  passReqToCallback: true
+};
+
+global.flickrOptions = {
+  api_key: flickrConfig.consumerKey,
+  secret: flickrConfig.consumerSecret,
+};
 
 app.configure('development', function(){
+//  app.use(express.static(__dirname + '/src'));
   app.use(express.errorHandler({ dumpExceptions: true, showStack: true }));
   mongo = {
 		"hostname":"localhost",
@@ -63,28 +105,35 @@ app.configure('development', function(){
 		"name":"",
 		"db":"db3"
 	};
-	googleConfig = nconf.get("settings");
+  //  dropboxConfig = nconf.get("dropbox-settings");
 });
 
 app.configure('production', function(){
 	app.use(express.errorHandler());
-	//var env = JSON.parse(process.env.VCAP_SERVICES);
-	//logger.info(env);
-	//mongo = env['mongodb-1.8'][0]['credentials'];
+    app.use(function (req, res, next) {
+      var schema = (req.headers['x-forwarded-proto'] || '').toLowerCase();
+//      console.log(schema)
+      if (schema === 'https') {
+        next();
+      } else {
+        res.redirect('https://' + req.headers.host + req.url);
+      }
+    });
+
+	var mongoServiceName = process.env.DATABASE_SERVICE_NAME.toUpperCase();
 	mongo = {
-		"hostname": process.env.OPENSHIFT_MONGODB_DB_HOST,
-		"port": parseInt(process.env.OPENSHIFT_MONGODB_DB_PORT),
-		"username": process.env.OPENSHIFT_MONGODB_DB_USERNAME,
-		"password": process.env.OPENSHIFT_MONGODB_DB_PASSWORD,
-		"name": process.env.OPENSHIFT_APP_NAME,
-		"db": process.env.OPENSHIFT_APP_NAME
+		"hostname": process.env[mongoServiceName + '_SERVICE_HOST'],
+		"port": parseInt(process.env[mongoServiceName + '_SERVICE_PORT']),
+		"username": process.env[mongoServiceName + '_USER'],
+		"password": process.env[mongoServiceName + '_PASSWORD'],
+		"db": process.env[mongoServiceName + '_DATABASE'],
 	};
 	//logger.info(mongo1);
 	//mongo = env['mongodb-1.8'][0];
-	googleConfig = nconf.get("settings");
 });
 
 // Passport
+// Google
 
 passport.use(new GoogleStrategy( googleConfig,
   function(request, accessToken, refreshToken, profile, done) {
@@ -95,22 +144,59 @@ passport.use(new GoogleStrategy( googleConfig,
       // represent the logged-in user.  In a typical application, you would want
       // to associate the Google account with a user record in your database,
       // and return that user instead.
-
       logger.info('email=' + profile.emails[0].value);
-		User.findOne({ email: profile.emails[0].value }, function(err, user) {
-			if (err) { return done(err); }
-			if (user) {
-				user.name = profile.displayName;
-				//user.role = 'admin';
-				//console.log(profile);
-                request.session.accessToken = accessToken;
+		  User.findOne({ email: profile.emails[0].value }, function(err, user) {
+			  if (err) { return done(err); }
+			  if (user) {
+				  user.name = profile.displayName;
+				  //user.role = 'admin';
+				  //console.log(profile);
+          request.session.accessToken = accessToken;
+          request.session.provider = 'google';
 
-				return done(null, user);
-			} else {
-				logger.error('User not found %s', user);
-				return done(null, false, { message: 'User not found' });
-			}
-		});
+				  return done(null, user);
+			  } else {
+				  logger.error('User not found %s', user);
+				  return done(null, false, { message: 'User not found' });
+			  }
+		  });
+    });
+  }
+));
+
+// Flickr
+
+passport.use(new FlickrStrategy( flickrConfig,
+  function(request, accessToken, accessTokenSecret, profile, done) {
+    // asynchronous verification, for effect...
+    process.nextTick(function () {
+
+      // To keep the example simple, the user's Google profile is returned to
+      // represent the logged-in user.  In a typical application, you would want
+      // to associate the Google account with a user record in your database,
+      // and return that user instead.
+
+      logger.info(profile, accessToken, accessTokenSecret);
+      logger.info('displayName=' + profile.displayName);
+		  User.findOne({ email: profile.displayName }, function(err, user) {
+			  if (err) { return done(err); }
+			  if (user) {
+				  user.name = profile.displayName;
+				  //user.role = 'admin';
+				  //console.log(profile);
+          request.session.accessToken = {
+            access_token: accessToken,
+            access_token_secret: accessTokenSecret,
+            user_id: profile.id
+          };
+          request.session.provider = 'flickr';
+
+				  return done(null, user);
+			  } else {
+				  logger.error('User not found %s', user);
+				  return done(null, false, { message: 'User not found' });
+			  }
+		  });
     });
   }
 ));
@@ -123,10 +209,14 @@ passport.use(new GoogleStrategy( googleConfig,
 // have a database of user records, the complete Google profile is
 // serialized and deserialized.
 passport.serializeUser(function(user, done) {
+//  console.log('serializeUser') ;
+//  console.log(user);
   done(null, user);
 });
 
 passport.deserializeUser(function(obj, done) {
+//  console.log('deserializeUser')  ;
+//  console.log(obj);
   done(null, obj);
 });
 
@@ -151,44 +241,13 @@ models.defineModels(mongoose, function() {
   db = mongoose.connect(mongourl);
 });
 
-var hexKey = fs.readFileSync('./key', 'utf8');
-console.log(hexKey);
-global.key = new Buffer(hexKey, 'hex');
+var hexKey = process.env.KEY;
 
-// Routes
-//
-//User.collection.drop(function (err) {
-//	if (err) {
-//		console.log('Drop Users ' + err);
-//	}
-//});
-//
-//var usrs = [
-//];
-//var user = null;
-//usrs.forEach(function (usr){
-//	user = new User;
-//	console.log('email ' + usr.email);
-//	console.log('role ' + usr.role);
-//	user.email = usr.email;
-//	user.role = usr.role;
-//	user.familyId = usr.familyId;
-//	user.save(function (error){
-//		if (error) {
-//			console.log('Error creating ' + error);
-//		}
-//	});
-//});
-//Item.collection.drop(function (err) {
-//	if (err) {
-//		console.log('Drop List ' + err);
-//	}
-//});
-//Item.collection.drop(function (err) {
-//	if (err) {
-//		console.log('Drop Item ' + err);
-//	}
-//});
+global.key = new Buffer(hexKey, 'hex');
+global.sizes = nconf.sizes;
+_.each(global.sizes, function(size){
+    size.size = 4 * size.width * size.height;
+});
 
 function ensureAuthenticated(req, res, next) {
 	if (req.isAuthenticated()) {
@@ -199,9 +258,11 @@ function ensureAuthenticated(req, res, next) {
 	if (req.xhr) {
 		res.send(403, { error: 'Not authorized' });
 	} else {
-		logger.info(req.url);
-		req.session.originalUrl = req.url;
-		res.redirect('/login');
+		if(!req.session.originalUrl){
+            req.session.originalUrl = (req.url === '/'?'/index':req.url) ;
+            logger.info("Original " + req.session.originalUrl);
+        }
+        res.redirect('/login');
 	}
 }
 
@@ -213,7 +274,7 @@ function andRestrictTo(role) {
 
 function ensureKeys(req, res, next) {
     if (!req.session.keys){
-        return gdrive.getKeys(req, res, next);
+        return services.getKeys(req, res, next);
     } else {
         return next();
     }
@@ -221,7 +282,7 @@ function ensureKeys(req, res, next) {
 
 function generateKey(req, res, next) {
     if (!req.session.permissionId){
-        return gdrive.generateKey(req, res, next);
+        return services.generateKey(req, res, next);
     } else {
         return next();
     }
@@ -230,13 +291,22 @@ function generateKey(req, res, next) {
 //app.get('/', ensureAuthenticated, routes.index);
 //app.get('/admin', ensureAuthenticated, andRestrictTo('admin'), routes.baseAdmin);
 app.get('/login', routes.login);
-app.get('/index', ensureAuthenticated, routes.index);
+app.get('/index', ensureAuthenticated, routes.base);
 app.get('/auth/google/request', passport.authenticate('google', {scope: ['https://www.googleapis.com/auth/userinfo.email', 'https://www.googleapis.com/auth/userinfo.profile', 'https://www.googleapis.com/auth/drive']}));
 
 app.get('/auth/google/callback',
 	passport.authenticate('google', { failureRedirect: '/login' }),
 	function(req, res) {
-		res.redirect(req.session.originalUrl ? req.session.originalUrl : '/index');
+		res.redirect('/index');
+	}
+);
+
+app.get('/auth/flickr/request', passport.authenticate('flickr'));
+
+app.get('/auth/flickr/callback',
+	passport.authenticate('flickr', { failureRedirect: '/login' }),
+	function(req, res) {
+		res.redirect('/index');
 	}
 );
 
@@ -245,17 +315,29 @@ app.get('/partials/:name', ensureAuthenticated, routes.partials);
 
 // JSON API
 
-app.get('/api/files/google/list',       ensureAuthenticated, ensureKeys, generateKey, gdrive.getFiles);
-app.get('/api/files/google/download',   ensureAuthenticated, ensureKeys, generateKey, gdrive.downloadFile);
-app.post('/api/files/google/upload',    ensureAuthenticated, ensureKeys, generateKey, gdrive.uploadFile);
-app.post('/api/files/google/delete',    ensureAuthenticated, ensureKeys, generateKey, gdrive.deleteFile);
-app.post('/api/files/google/share',     ensureAuthenticated, ensureKeys, generateKey, gdrive.shareFile);
+app.get('/api/files/list',       ensureAuthenticated, ensureKeys, generateKey, services.getFiles);
+app.get('/api/files/download',   ensureAuthenticated, ensureKeys, generateKey, services.downloadFile);
+app.post('/api/files/modify/:id',     ensureAuthenticated, ensureKeys, generateKey, services.setDateTaken);
+app.post('/api/files/upload',    ensureAuthenticated, ensureKeys, generateKey, upload.uploadFile);
+app.post('/api/files/delete',    ensureAuthenticated, ensureKeys, generateKey, services.deleteFile);
+app.post('/api/files/share',     ensureAuthenticated, ensureKeys, generateKey, services.shareFile);
+app.get('/api/files/:id/status',     ensureAuthenticated, ensureKeys, generateKey, services.getStatus);
+
+
+//app.ws('/api/files/upload',    ensureAuthenticated, ensureKeys, generateKey, upload.uploadFile2);
+//app.ws('/', function(ws, req) {
+//  var id = setInterval(function() {
+//    ws.send(JSON.stringify(new Date()), function() {  })
+//  }, 1000);
+////  console.log('socket', req);
+//});
+
 
 // redirect all others to the index (HTML5 history)
-app.get('*', routes.login);
+app.get('*', ensureAuthenticated, routes.base);
 
 // Start server
 
-app.listen(process.env.OPENSHIFT_NODEJS_PORT || 3000, function(){
+app.listen(process.env.PORT || process.env.OPENSHIFT_NODEJS_PORT || 8080, process.env.IP || process.env.OPENSHIFT_NODEJS_IP || '0.0.0.0', function(){
   logger.info("Express server listening on port %d in %s mode", this.address().port, app.settings.env);
 });

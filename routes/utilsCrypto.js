@@ -7,12 +7,12 @@ var logger = require('../winston'),
 var iv = '8888888888888888';
 
 exports.decrypt = function (buffer, key) {
-	logger.info('Decrypt');
+//	logger.info('Decrypt');
 
     var decipher = crypto.createDecipheriv('aes-128-cbc', key, iv);
 
-    console.log(buffer.toString('hex'));
-    console.log(new Buffer(key, 'binary').toString('hex'));
+    logger.silly(buffer.toString('hex'));
+    logger.silly(new Buffer(key, 'binary').toString('hex'));
     var chunks = [];
     chunks.push(decipher.update(buffer, null, 'binary'));
     chunks.push(decipher.final('binary'));
@@ -22,11 +22,11 @@ exports.decrypt = function (buffer, key) {
 };
 
 exports.encrypt = function (buffer, key) {
-	logger.info('Encrypt');
+//	logger.info('Encrypt');
 
     var cipher = crypto.createCipheriv('aes-128-cbc', key, iv);
 
-    console.log(buffer);
+//    logger.silly(buffer);
 
     var tt = [];
     tt.push(cipher.update(buffer));
