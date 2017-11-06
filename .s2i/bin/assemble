@@ -48,7 +48,7 @@ if [ -n "$NPM_MIRROR" ]; then
 fi
 
 echo "---> Building your Node application from source"
-npm-f3-install.sh
+/tmp/src/npm-f3-install.sh
 
 # Fix source directory permissions
 fix-permissions ./
