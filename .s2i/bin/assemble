@@ -49,7 +49,8 @@ fi
 
 echo "---> Building your Node application from source"
 chmod u=rx ./npm-f3-install.sh
-./npm-f3-install.sh
+# ./npm-f3-install.sh
+npm install
 
 # Fix source directory permissions
 fix-permissions ./
