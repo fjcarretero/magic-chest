@@ -48,7 +48,6 @@
     "file-loader": "^0.9.0",
     "imports-loader": "^0.7.0",
     "jshint": "0.9.1",
-    "node-sass": "^4.3.0",
     "resolve-url-loader": "^1.6.1",
     "sass-loader": "^4.1.1",
     "style-loader": "^0.13.1",
