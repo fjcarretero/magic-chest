@@ -26,6 +26,7 @@
     "jquery": "^1.12.4",
     "moment": "2.5.1",
     "mongoose": "4.3.x",
+    "nconf": "0.6.9",
     "node-png": "0.4.3",
     "passport": "0.1.x",
     "passport-dropbox-oauth2": "0.1.x",
