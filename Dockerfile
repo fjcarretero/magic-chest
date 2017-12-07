@@ -11,6 +11,7 @@ COPY package.json /magic-chest/
 COPY webpack.config.js /magic-chest/
 COPY webpack.prod.config.js /magic-chest/
 COPY winston.js /magic-chest/
+COPY insertUser.js /magic-chest/
 
 RUN cd /magic-chest && \
     npm install && \
