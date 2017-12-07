@@ -58,17 +58,17 @@ app.configure( function() {
   app.use(passport.session());
   app.use(clientErrorHandler);
   app.use(errorHandler);
-  app.configure('production', function(){
-    app.use(function (req, res, next) {
-      var schema = (req.headers['x-forwarded-proto'] || '').toLowerCase();
-//      console.log(schema)
-      if (schema === 'https') {
-        next();
-      } else {
-        res.redirect('https://' + req.headers.host + req.url);
-      }
-    });
-  });
+//   app.configure('production', function(){
+//     app.use(function (req, res, next) {
+//       var schema = (req.headers['x-forwarded-proto'] || '').toLowerCase();
+// //      console.log(schema)
+//       if (schema === 'https') {
+//         next();
+//       } else {
+//         res.redirect('https://' + req.headers.host + req.url);
+//       }
+//     });
+//   });
   app.use(app.router);
 });
 
