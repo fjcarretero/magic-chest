@@ -164,7 +164,7 @@ function GDrive(){
     };
 
     this.storeKey = function(accessToken, buf, callback, callbackError){
-        var cipher = crypto2.createCipheriv('aes-128-cbc', global.key.toString('binary'), '8888888888888888');
+        var cipher = crypto2.createCipheriv('aes-128-cbc', global.key, '8888888888888888');
 
         var ret = {
             keys: {}
