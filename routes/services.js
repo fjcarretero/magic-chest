@@ -20,7 +20,7 @@ exports.getKeys = function (req, res, next) {
             req.session.permissionId = response.permissionId;
             req.session.keyFileId = response.keyFileId;
             req.session.keys = response.keys;
-						req.session.folderId = response.folderId;
+			req.session.folderId = response.folderId;
             return next()
         },
         function(error){
@@ -41,7 +41,7 @@ exports.generateKey = function (req, res, next) {
                     req.session.permissionId = response.permissionId;
                     req.session.keyFileId = response.keyFileId;
                     req.session.keys = response.keys;
-										req.session.folderId = response.folderId;
+					req.session.folderId = response.folderId;
                     return next()
                 },
                 function(error){
@@ -71,7 +71,7 @@ exports.getFiles = function (req, res, next) {
 
 exports.downloadFile = function (req, res, next) {
 	logger.info('download File');
-    logger.info(req.query);
+    logger.info(req);
     var sKey = req.session.keys[req.query.permissionId];
 
     var tt = crypto.decrypt(new Buffer(req.query.fileName, 'hex'), sKey).split('|');

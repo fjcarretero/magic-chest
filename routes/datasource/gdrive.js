@@ -140,8 +140,8 @@ function GDrive(){
     //                        req.session.keyFileId = item.id;
                             ret.permissionId = item.owners[0].permissionId;
                             ret.keyFileId = item.id;
-														ret.folderId = item.parents[0].id;
-														console.log(ret);
+							ret.folderId = item.parents[0].id;
+							console.log(ret);
                         }
                         queue.push(q.nfcall(retrieveStoreKeys, accessToken, ret, item));
                     });
