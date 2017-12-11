@@ -26,7 +26,7 @@ function GDrive(){
                 } else {
 //                    console.log(resp.body);
                     var tt = crypto.decrypt(resp.body, global.key);
-                    session.keys[item.owners[0].permissionId] = new Buffer(tt, 'binary');
+                    session.keys[item.owners[0].permissionId] = tt;
 //                    console.log(session.keys);
                     callback();
                 }
@@ -60,7 +60,7 @@ function GDrive(){
 
     function mapFile(item, tKey, callback){
         logger.info('title', item.title);
-        var tt = crypto.decrypt(new Buffer(item.title, 'hex'), tKey).split('|');
+        var tt = crypto.decrypt(new Buffer(item.title, 'hex'), new Buffer(tKey, 'binary').split('|');
 
         //logger.info('item=', item);
 

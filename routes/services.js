@@ -71,10 +71,10 @@ exports.getFiles = function (req, res, next) {
 
 exports.downloadFile = function (req, res, next) {
 	logger.info('download File');
-    logger.info(req);
+    logger.info(req.query);
     var sKey = req.session.keys[req.query.permissionId];
 
-    var tt = crypto.decrypt(new Buffer(req.query.fileName, 'hex'), sKey).split('|');
+    var tt = crypto.decrypt(new Buffer(req.query.fileName, 'hex'), new Buffer(sKey,'binary')).split('|');
 
     var mimetype = tt[1];
     if (!mimetype) {
