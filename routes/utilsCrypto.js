@@ -7,7 +7,7 @@ var logger = require('../winston'),
 var iv = '8888888888888888';
 
 exports.decrypt = function (buffer, key) {
-//	logger.info('Decrypt');
+	logger.info('Decrypt', key);
 
     var decipher = crypto.createDecipheriv('aes-128-cbc', key, iv);
 
