@@ -15,7 +15,7 @@ exports.uploadFile = function (req, res, next) {
 
     var sKey = req.session.keys[req.session.permissionId];
 //    console.log(new Buffer(sKey, 'binary'));
-    var cipher = crypto2.createCipheriv('aes-128-cbc', sKey, '8888888888888888');
+    var cipher = crypto2.createCipheriv('aes-128-cbc', new Buffer(sKey, 'binary'), '8888888888888888');
     var form = new formidable.IncomingForm();
     form.multiples = true;
     var encName;
@@ -44,7 +44,7 @@ exports.uploadFile = function (req, res, next) {
             progress: 0
         };
 
-        encName = crypto.encrypt(tt.join('|'), sKey).toString('hex');
+        encName = crypto.encrypt(tt.join('|'), new Buffer(sKey, 'binary')).toString('hex');
 
 //        if (req.session.provider === 'flickr') {
 //            logger.info(part.filename, form.bytesExpected);
