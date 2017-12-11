@@ -26,7 +26,7 @@ function GDrive(){
                 } else {
 //                    console.log(resp.body);
                     var tt = crypto.decrypt(resp.body, global.key);
-                    session.keys[item.owners[0].permissionId] = tt;
+                    session.keys[item.owners[0].permissionId] = new Buffer(tt, 'binary');
 //                    console.log(session.keys);
                     callback();
                 }
