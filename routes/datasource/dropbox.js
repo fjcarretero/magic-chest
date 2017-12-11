@@ -77,7 +77,7 @@ function DropBox(){
                         logger.error(resp.error);
                     } else {
                         var response = resp;
-                        var tt = crypto.decrypt(new Buffer(resp.text, 'hex'), global.key.toString('binary'));
+                        var tt = crypto.decrypt(new Buffer(resp.text, 'hex'), global.key);
                         ret.permissionId = 'db';
                         ret.keyFileId = 'id';
                         ret.keys = {'db': tt};
@@ -89,7 +89,7 @@ function DropBox(){
 
     this.storeKey = function(accessToken, buf, callback, callbackError){
         var ret = {};
-        var kk = crypto.encrypt(buf, global.key.toString('binary')).toString('hex');
+        var kk = crypto.encrypt(buf, global.key).toString('hex');
         var rq = request
             .post('https://api-content.dropbox.com/1/files_put/sandbox/magic-chest')
             .type('text/plain')
