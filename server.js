@@ -291,6 +291,16 @@ function generateKey(req, res, next) {
 
 //app.get('/', ensureAuthenticated, routes.index);
 //app.get('/admin', ensureAuthenticated, andRestrictTo('admin'), routes.baseAdmin);
+app.get('/probe', function(req, res){
+	User.count({}, function(err, count){
+		if (err) {
+			res.send(500, 'NOk');
+		} else {
+    	console.log( "Number of docs: ", count )
+			res.send(200, 'Ok');
+		}
+	});
+});
 app.get('/login', routes.login);
 app.get('/index', ensureAuthenticated, routes.base);
 app.get('/auth/google/request', passport.authenticate('google', {scope: ['https://www.googleapis.com/auth/userinfo.email', 'https://www.googleapis.com/auth/userinfo.profile', 'https://www.googleapis.com/auth/drive']}));

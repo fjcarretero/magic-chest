@@ -10,7 +10,7 @@ exports.decrypt = function (buffer, key) {
 	logger.info('Decrypt', key);
 
     var decipher = crypto.createDecipheriv('aes-128-cbc', key, iv);
-    decipher.setAutoPadding(false);
+    //decipher.setAutoPadding(false);
 
     logger.silly(buffer.toString('hex'));
     logger.silly(new Buffer(key, 'binary').toString('hex'));
