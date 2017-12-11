@@ -60,7 +60,7 @@ function GDrive(){
 
     function mapFile(item, tKey, callback){
         logger.info('title', item.title);
-        var tt = crypto.decrypt(new Buffer(item.title, 'hex'), new Buffer(tKey, 'binary').split('|');
+        var tt = crypto.decrypt(new Buffer(item.title, 'hex'), new Buffer(tKey, 'binary')).split('|');
 
         //logger.info('item=', item);
 
