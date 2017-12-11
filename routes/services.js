@@ -82,7 +82,7 @@ exports.downloadFile = function (req, res, next) {
 	}
     res.header('Content-Type', mimetype);
     res.header('Content-Disposition', 'attachment; filename="' + tt[0] + '"');
-    var decipher = crypto2.createDecipheriv('aes-128-cbc', sKey, '8888888888888888');
+    var decipher = crypto2.createDecipheriv('aes-128-cbc', new Buffer(sKey, 'binary'), '8888888888888888');
 
     var dat;
 
