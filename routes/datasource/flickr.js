@@ -76,7 +76,7 @@ function Flickr(){
     };
 
     function mapFile(item, tKey, callback){
-        var tt = crypto.decrypt(new Buffer(item.title, 'hex'), tKey).split('|');
+        var tt = crypto.decrypt(new Buffer(item.title, 'hex'), new Buffer(tKey, 'binary')).split('|');
 
         var ret = _mapFile(item);
         ret.name = tt[0];
