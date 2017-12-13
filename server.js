@@ -13,6 +13,7 @@ var _ =  require('underscore'),
   passport = require('passport'),
   nconf = require('nconf'),
   fs = require('fs'),
+  morgan  = require('morgan'),
   GoogleStrategy = require('passport-google-oauth').OAuth2Strategy,
   FlickrStrategy = require('passport-flickr').Strategy,
   logger = require('./winston');
@@ -56,6 +57,9 @@ app.configure( function() {
   app.use(express.session({ secret: 'keyboard cat' }));
   app.use(passport.initialize());
   app.use(passport.session());
+  app.use(morgan('combined', {
+    skip: function (req, res) { return req.url === '/probe' }
+  }));
   app.use(clientErrorHandler);
   app.use(errorHandler);
 //   app.configure('production', function(){

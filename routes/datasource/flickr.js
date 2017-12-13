@@ -234,7 +234,7 @@ function Flickr(){
                                 .buffer()
                                 .end(function(err, resp2){
                                     getKeyPNGData(resp2.body, function(data){
-                                        var tt = crypto.decrypt(new Buffer(data, 'hex'), global.key.toString('binary'));
+                                        var tt = crypto.decrypt(new Buffer(data, 'hex'), global.key);
 //                                        logger.info(tt);
                                         ret.permissionId = 'flr';
                                         ret.keyFileId = 'flr';
